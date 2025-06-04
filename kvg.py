@@ -16,9 +16,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, re, datetime
+import datetime
+import os
+import re
+import sys
+
 from kanjivg import LICENSE_STRING
-from utils import open
 
 pathre = re.compile(r'<path .*d="([^"]*)".*/>')
 
@@ -26,9 +29,7 @@ helpString = """Usage: %s <command> [ kanji files ]
 Recognized commands:
   split file1 [ file2 ... ]       extract path data into a -paths suffixed file
   merge file1 [ file2 ... ]       merge path data from -paths suffixed file
-  release                         create single release file""" % (
-    sys.argv[0],
-)
+  release                         create single release file""" % (sys.argv[0],)
 
 
 def createPathsSVG(f):
@@ -55,14 +56,15 @@ def mergePathsSVG(f):
     pos = 0
     while True:
         match = pathre.search(s[pos:])
-        if match and len(paths) == 0 or not match and len(paths) > 0:
+        if (match and len(paths) == 0) or (not match and len(paths) > 0):
             print(f"Paths count mismatch for {f}")
             return
         if not match and len(paths) == 0:
             break
-        s = s[: pos + match.start(1)] + paths[0] + s[pos + match.end(1) :]
-        pos += match.start(1) + len(paths[0])
-        del paths[0]
+        if match is not None:
+            s = s[: pos + match.start(1)] + paths[0] + s[pos + match.end(1) :]
+            pos += match.start(1) + len(paths[0])
+            del paths[0]
     open(f, "w", encoding="utf-8").write(s)
 
 

@@ -16,13 +16,16 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ordered_set import OrderedSet
-from src.kvg.xmlhandler import BasicHandler
+
 from src.kvg.utils import PYTHON_VERSION_MAJOR, canonicalId
+from src.kvg.xmlhandler import BasicHandler
 
 if PYTHON_VERSION_MAJOR > 2:
 
     def unicode(s):
         return s
+
+    unichr = chr
 
 
 # Sample license header
@@ -69,7 +72,6 @@ def realord(s, pos=0):
 
 
 def realchr(i):
-
     if i < 0x10000:
         return unichr(i)
     else:
@@ -102,13 +104,17 @@ class Kanji:
             stroke.numberToSVG(out, cpt, indent + 1)
 
     def outputStrokes(self, out, indent=0):
-        self.strokes.toSVG(out, self.kId(), [0], [1])
+        if self.strokes is not None:
+            self.strokes.toSVG(out, self.kId(), [0], [1])
 
     def simplify(self):
-        self.strokes.simplify()
+        if self.strokes is not None:
+            self.strokes.simplify()
 
     def getStrokes(self):
-        return self.strokes.getStrokes()
+        if self.strokes is not None:
+            return self.strokes.getStrokes()
+        return []
 
 
 class StrokeGr:
@@ -119,11 +125,11 @@ class StrokeGr:
         if parent:
             parent.children.append(self)
         # Element of StrokeGr
-        self.element: str = None
+        self.element: str | None = None
         # A more common, safer element this one derives of
         self.original = None
-        self.part = None
-        self.number = None
+        self.part: int | None = None
+        self.number: int | None = None
         self.variant = False
         self.partial = False
         self.tradForm = False
@@ -139,7 +145,9 @@ class StrokeGr:
 
     def setParent(self, parent):
         if self.parent is not None or parent is None:
-            raise "Set parent should only be set once! There is no cleanup for old parents."
+            raise Exception(
+                "Set parent should only be set once! There is no cleanup for old parents."
+            )
         parent.children.append(self)
         self.parent = parent
 
@@ -340,6 +348,8 @@ class KanjisHandler(BasicHandler):
             raise Exception("A group is not closed inside the kanji.")
         if len(self.groups) != 1:
             raise Exception("Kanji should have 1 root group.")
+        if self.kanji is None:
+            raise Exception("No kanji object to assign strokes to.")
         self.kanji.strokes = self.groups[0]
         self.kanjis[self.kanji.code] = self.kanji
         self.groups = []
@@ -354,9 +364,9 @@ class KanjisHandler(BasicHandler):
         if "kvg:element" in attrs:
             group.element = unicode(attrs["kvg:element"])
         if "kvg:variant" in attrs:
-            group.variant = str(attrs["kvg:variant"])
+            group.variant = str(attrs["kvg:variant"]).lower() == "true"
         if "kvg:partial" in attrs:
-            group.partial = str(attrs["kvg:partial"])
+            group.partial = str(attrs["kvg:partial"]).lower() == "true"
         if "kvg:original" in attrs:
             group.original = unicode(attrs["kvg:original"])
         if "kvg:part" in attrs:
@@ -385,28 +395,42 @@ class KanjisHandler(BasicHandler):
             if not group.part:
                 print(f"{self.kanji.kId()}: Number specified, but part missing")
             # The group must exist already
-            if group.part > 1:
-                if (group.element + str(group.number)) not in self.compCpt:
+            if group.part and group.part > 1:
+                if (
+                    group.element
+                    and (group.element + str(group.number)) not in self.compCpt
+                ):
                     print(f"{self.kanji.kId()}: Missing numbered group")
-                elif self.compCpt[group.element + str(group.number)] != group.part - 1:
+                elif (
+                    group.element
+                    and self.compCpt[group.element + str(group.number)]
+                    != group.part - 1
+                ):
                     print(f"{self.kanji.kId()}: Incorrectly numbered group")
-            elif (group.element + str(group.number)) in self.compCpt:
+            elif group.element and (group.element + str(group.number)) in self.compCpt:
                 print(f"{self.kanji.kId()}: Duplicate numbered group")
-            self.compCpt[group.element + str(group.number)] = group.part
+            if group.element:
+                self.compCpt[group.element + str(group.number)] = group.part
         elif group.part:
             # The group must exist already
-            if group.element not in self.compCpt:
-                if group.part > 1:
+            if group.element and group.element not in self.compCpt:
+                if group.part and group.part > 1:
                     print(f"{self.kanji.kId()}: Incorrectly started multi-part group")
-            elif self.compCpt[group.element] != group.part - 1:
+            elif (
+                group.element
+                and group.part
+                and self.compCpt[group.element] != group.part - 1
+            ):
                 if group.part > 1:
                     print(f"{self.kanji.kId()}: Incorrectly splitted multi-part group")
-            self.compCpt[group.element] = group.part
+            if group.element and group.part:
+                self.compCpt[group.element] = group.part
 
     def handle_end_g(self):
-        if self.group.parent is None:
+        if self.group and self.group.parent is None:
             self.groups.append(self.group)
-        self.group = self.group.parent
+        if self.group:
+            self.group = self.group.parent
 
     def handle_start_path(self, attrs):
         if self.kanji is None or self.group is None:
@@ -442,7 +466,7 @@ class SVGHandler(BasicHandler):
             elif idType == "kvg:StrokeNumbers":
                 return
             else:
-                raise Exception(f'Invalid root group id type ({str(attrs["id"])})')
+                raise Exception(f"Invalid root group id type ({str(attrs['id'])})")
             self.current_kanji = Kanji(*idVariant)
             self.kanjis[self.current_kanji.code] = self.current_kanji
             self.compCpt = {}
@@ -453,9 +477,9 @@ class SVGHandler(BasicHandler):
         if "kvg:element" in attrs:
             group.element = unicode(attrs["kvg:element"])
         if "kvg:variant" in attrs:
-            group.variant = str(attrs["kvg:variant"])
+            group.variant = str(attrs["kvg:variant"]).lower() == "true"
         if "kvg:partial" in attrs:
-            group.partial = str(attrs["kvg:partial"])
+            group.partial = str(attrs["kvg:partial"]).lower() == "true"
         if "kvg:original" in attrs:
             group.original = unicode(attrs["kvg:original"])
         if "kvg:part" in attrs:
@@ -482,28 +506,46 @@ class SVGHandler(BasicHandler):
 
         if group.number:
             if not group.part:
-                print(f"{self.current_kanji.kId()}: Number specified, but part missing")
+                if self.current_kanji:
+                    print(
+                        f"{self.current_kanji.kId()}: Number specified, but part missing"
+                    )
             # The group must exist already
-            if group.part > 1:
-                if group.element + str(group.number) not in self.compCpt:
-                    print(f"{self.current_kanji.kId()}: Missing numbered group")
-                elif self.compCpt[group.element + str(group.number)] != group.part - 1:
-                    print(f"{self.current_kanji.kId()}: Incorrectly numbered group")
-            elif (group.element + str(group.number)) in self.compCpt:
-                print(f"{self.current_kanji.kId()}: Duplicate numbered group")
-            self.compCpt[group.element + str(group.number)] = group.part
+            if group.part and group.part > 1:
+                if (
+                    group.element
+                    and group.element + str(group.number) not in self.compCpt
+                ):
+                    if self.current_kanji:
+                        print(f"{self.current_kanji.kId()}: Missing numbered group")
+                elif (
+                    group.element
+                    and group.part
+                    and self.compCpt[group.element + str(group.number)]
+                    != group.part - 1
+                ):
+                    if self.current_kanji:
+                        print(f"{self.current_kanji.kId()}: Incorrectly numbered group")
+            elif group.element and (group.element + str(group.number)) in self.compCpt:
+                if self.current_kanji:
+                    print(f"{self.current_kanji.kId()}: Duplicate numbered group")
+            if group.element and group.part:
+                self.compCpt[group.element + str(group.number)] = group.part
         elif group.part:
             # The group must exist already
-            if group.part > 1:
-                if group.element not in self.compCpt:
-                    print(
-                        f"{self.current_kanji.kId()}: Incorrectly started multi-part group"
-                    )
-                elif self.compCpt[group.element] != group.part - 1:
-                    print(
-                        f"{self.current_kanji.kId()}: Incorrectly splitted multi-part group"
-                    )
-            self.compCpt[group.element] = group.part
+            if group.part and group.part > 1:
+                if group.element and group.element not in self.compCpt:
+                    if self.current_kanji:
+                        print(
+                            f"{self.current_kanji.kId()}: Incorrectly started multi-part group"
+                        )
+                elif group.element and self.compCpt[group.element] != group.part - 1:
+                    if self.current_kanji:
+                        print(
+                            f"{self.current_kanji.kId()}: Incorrectly splitted multi-part group"
+                        )
+            if group.element and group.part:
+                self.compCpt[group.element] = group.part
 
     def handle_end_g(self):
         if len(self.groups) == 0:
@@ -511,7 +553,8 @@ class SVGHandler(BasicHandler):
         group = self.groups.pop()
         # End of kanji?
         if len(self.groups) == 1:  # index 1 - ignore root group
-            self.current_kanji.strokes = group
+            if self.current_kanji:
+                self.current_kanji.strokes = group
             self.current_kanji = None
             self.groups = []
 

@@ -17,9 +17,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os, re, datetime
+import sys
+
 from kanjivg import Stroke, StrokeGr
-from utils import listSvgFiles, readXmlFile, canonicalId, PYTHON_VERSION_MAJOR
+from kvg.utils import PYTHON_VERSION_MAJOR, canonicalId, listSvgFiles, readXmlFile
 
 if PYTHON_VERSION_MAJOR > 2:
 
@@ -154,7 +155,7 @@ if __name__ == "__main__":
     args = sys.argv[2:]
 
     if len(args) == 0:
-        action()
+        action(None)
     else:
         for f in args:
             action(f)
