@@ -222,6 +222,7 @@ class StrokeGr:
             if isinstance(child, StrokeGr):
                 child.simplify()
         if len(self.children) == 1 and isinstance(self.children[0], StrokeGr):
+            child = self.children[0]
             # Check if there is no conflict
             if child.element and self.element and child.element != self.element:
                 return
@@ -252,7 +253,6 @@ class StrokeGr:
                 return
 
             # Ok, let's merge!
-            child = self.children[0]
             self.children = child.children
             if child.element:
                 self.element = child.element
