@@ -19,8 +19,8 @@
 
 import sys
 
-from kanjivg import Stroke, StrokeGr
-from kvg.utils import PYTHON_VERSION_MAJOR, canonicalId, listSvgFiles, readXmlFile
+from src.kvg.kanjivg import Stroke, StrokeGr
+from src.kvg.utils import PYTHON_VERSION_MAJOR, canonicalId, listSvgFiles, readXmlFile
 
 if PYTHON_VERSION_MAJOR > 2:
 
