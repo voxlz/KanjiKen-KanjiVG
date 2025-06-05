@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+# type: ignore
+#
+# # -*- coding: utf-8 -*-
 #
 #  Copyright (C) 2009-2013 Alexandre Courbot
 #
