@@ -21,7 +21,7 @@ import os
 import re
 import sys
 
-from kanjivg import LICENSE_STRING
+from src.kvg.kanjivg import LICENSE_STRING
 
 pathre = re.compile(r'<path .*d="([^"]*)".*/>')
 
