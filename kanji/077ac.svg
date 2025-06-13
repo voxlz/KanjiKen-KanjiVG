@@ -44,9 +44,8 @@ See http://creativecommons.org/licenses/by-sa/3.0/ for more details.
 				<path id="kvg:077ac-s4" kvg:type="㇐a" d="M15.31,58.26c4.22-0.68,8.94-1.38,14.25-2.18" />
 				<path id="kvg:077ac-s5" kvg:type="㇐a" d="M14.82,76.07c4.81-0.69,9.18-1.69,14.9-2.31" />
 			</g>
-			<g id="kvg:077ac-g2" kvg:position="right" kvg:phon="舜">
-				<!-- kvg:element="舜" -->
-				<g id="kvg:077ac-g3" kvg:position="top">
+			<g id="kvg:077ac-g2" kvg:position="right" kvg:element="舜" kvg:phon="舜">
+				<g id="kvg:077ac-g3" kvg:position="top" kvg:element="">
 					<g id="kvg:077ac-g4" kvg:element="⺤" kvg:variant="true" kvg:original="爪">
 						<path id="kvg:077ac-s6" kvg:type="㇒" d="M77.41,10.89c-0.16,0.98-0.56,1.85-1.33,2.32c-4.95,3.04-15.74,7.68-31.59,10.89" />
 						<path id="kvg:077ac-s7" kvg:type="㇔" d="M43.77,29.68c3.01,1.51,7.77,6.21,8.53,8.55" />
