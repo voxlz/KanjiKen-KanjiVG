@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kvg"
+version = "0.1.0"
+description = "KanjiVG utilities for kanji decomposition"
+readme = "README"
+requires-python = ">=3.8"
+dependencies = ["ordered-set"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["kvg*"]

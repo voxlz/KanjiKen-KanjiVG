@@ -1,0 +1,14 @@
+COPYING
+README
+pyproject.toml
+src/kvg/__init__.py
+src/kvg/kanjivg.py
+src/kvg/kvg-lookup.py
+src/kvg/kvg.py
+src/kvg/utils.py
+src/kvg/xmlhandler.py
+src/kvg.egg-info/PKG-INFO
+src/kvg.egg-info/SOURCES.txt
+src/kvg.egg-info/dependency_links.txt
+src/kvg.egg-info/requires.txt
+src/kvg.egg-info/top_level.txt
