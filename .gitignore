@@ -5,3 +5,4 @@ kanjivg-*xml.gz
 kanjivg-*.zip
 .DS_Store
 kvg-index.json
+cache
