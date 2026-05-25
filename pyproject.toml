@@ -13,3 +13,6 @@ dependencies = ["ordered-set"]
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["kvg*"]
+
+[tool.setuptools.package-data]
+kvg = ["kanji/*.svg"]
